@@ -1,31 +1,56 @@
-# React + TypeScript + Vite
+# DashDarkX
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite dashboard with a Node.js/Express + Prisma + SQLite backend.
 
-Currently, two official plugins are available:
+## Run the backend
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+```bash
+cd backend
+npm install
+copy .env.example .env
+npx prisma generate
+npx prisma migrate dev --name init
+npm run db:seed
+npm run dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
-"# dashdarkx" 
+Backend: `http://localhost:4000`
+
+Health check: `http://localhost:4000/api/health`
+
+Seeded admin:
+- Email: `admin@dashdarkx.local`
+- Password: `Admin123!`
+
+## Run the frontend
+
+In another terminal:
+
+```bash
+npm install
+npm run dev
+```
+
+Frontend: `http://localhost:5173/dashdarkX/`
+
+The frontend automatically uses `http://localhost:4000/api`. To change it, create a `.env` file in the project root:
+
+```
+VITE_API_URL=http://localhost:4000/api
+```
+
+## Backend features
+
+- JWT authentication
+- Signup / Login / Current user
+- SQLite database through Prisma
+- Users and roles
+- Products CRUD
+- Orders CRUD
+- Dashboard summary
+- Revenue, visitors and tasks endpoints
+- CORS and request validation with Zod
+
+## Important
+
+Change the JWT secret and the seeded admin password before deploying to production.
