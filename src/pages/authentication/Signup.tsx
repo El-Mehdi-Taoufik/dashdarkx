@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconifyIcon from 'components/base/IconifyIcon';
 import paths from 'routes/paths';
+import { api } from 'services/api';
 
 interface User {
   [key: string]: string;
@@ -104,7 +105,7 @@ const Signup = () => {
             ),
           }}
         />
-        <Button type="submit" variant="contained" size="medium" fullWidth sx={{ mt: 1.5 }}>
+        {error && <Typography color="error" variant="body2">{error}</Typography>}\n        <Button type="submit" variant="contained" size="medium" fullWidth sx={{ mt: 1.5 }}>
           Submit
         </Button>
         <Typography
