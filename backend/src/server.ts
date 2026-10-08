@@ -71,6 +71,48 @@ app.get('/api/auth/me', auth, asyncRoute(async (req, res) => {
   res.json({ user });
 }));
 
+app.get('/api/users', auth, admin, asyncRoute(async (_req, res) => {
+  const users = await prisma.user.findMany({
+    select: { id: true, name: true, email: true, role: true, createdAt: true, _count: { select: { orders: true } } },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json({ users });
+}));
+
+app.patch('/api/users/:id', auth, admin, asyncRoute(async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ message: 'Invalid user id' });
+  const schema = z.object({
+    name: z.string().min(2).max(80).optional(),
+    email: z.string().email().optional(),
+    role: z.enum(['ADMIN', 'USER']).optional(),
+  });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ message: 'Invalid user data' });
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: parsed.data,
+      select: { id: true, name: true, email: true, role: true, createdAt: true, _count: { select: { orders: true } } },
+    });
+    res.json({ user });
+  } catch {
+    res.status(409).json({ message: 'Email may already be in use or user does not exist' });
+  }
+}));
+
+app.delete('/api/users/:id', auth, admin, asyncRoute(async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ message: 'Invalid user id' });
+  if (id === req.user?.id) return res.status(400).json({ message: 'You cannot delete your own account' });
+  try {
+    await prisma.user.delete({ where: { id } });
+    res.status(204).send();
+  } catch {
+    res.status(404).json({ message: 'User not found' });
+  }
+}));
+
 app.get('/api/products', auth, asyncRoute(async (_req, res) => {
   res.json({ products: await prisma.product.findMany({ orderBy: { createdAt: 'desc' } }) });
 }));
