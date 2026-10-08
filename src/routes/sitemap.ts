@@ -35,7 +35,7 @@ const sitemap: MenuItem[] = [
   {
     id: 'users',
     subheader: 'Users',
-    path: '#!',
+    path: paths.users,
     icon: 'mingcute:user-2-fill',
   },
   {
