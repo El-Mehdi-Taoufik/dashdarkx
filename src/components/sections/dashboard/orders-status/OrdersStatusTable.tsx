@@ -62,15 +62,22 @@ const OrdersStatusTable = ({ searchText }: OrdersStatusTableProps) => {
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
 
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
   };
 
   const processRowUpdate = async (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false } as Order;
-    await api.updateOrder(Number(newRow.id), { status: newRow.status, country: newRow.country, total: Number(newRow.total) });
+    const updatedRow: Order = {
+      id: Number(newRow.id),
+      client: newRow.client,
+      date: newRow.date,
+      status: newRow.status,
+      country: newRow.country,
+      total: Number(newRow.total),
+    };
+    await api.updateOrder(Number(newRow.id), {
+      status: newRow.status,
+      country: newRow.country,
+      total: Number(newRow.total),
+    });
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
