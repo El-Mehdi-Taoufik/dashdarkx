@@ -15,6 +15,10 @@ export const api = {
   login: (body: { email: string; password: string }) => request<{ token: string; user: User }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   signup: (body: { name: string; email: string; password: string }) => request<{ token: string; user: User }>('/auth/signup', { method: 'POST', body: JSON.stringify(body) }),
   me: () => request<{ user: User }>('/auth/me'),
+  users: () => request<{ users: User[] }>('/users'),
+  updateUser: (id: number, body: Partial<Pick<User, 'name' | 'email' | 'role'>>) =>
+    request<{ user: User }>(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteUser: (id: number) => request<void>(`/users/${id}`, { method: 'DELETE' }),
   products: () => request<{ products: Product[] }>('/products'),
   orders: (search = '') => request<{ orders: Order[] }>(`/orders?search=${encodeURIComponent(search)}`),
   updateOrder: (id: number, body: Partial<Pick<Order, 'status' | 'country' | 'total'>>) => request<{ order: Order }>(`/orders/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
@@ -22,7 +26,7 @@ export const api = {
   summary: () => request<{ stats: DashboardStats }>('/dashboard/summary'),
 };
 
-export interface User { id: number; name: string; email: string; role: 'ADMIN' | 'USER'; }
+export interface User { id: number; name: string; email: string; role: 'ADMIN' | 'USER'; createdAt?: string; _count?: { orders: number }; }
 export interface Product { id: number; name: string; price: number; inStock: number; imageUrl?: string | null; }
 export interface Order { id: number; client: { id: number; name: string; email: string }; date: string; status: 'delivered' | 'pending' | 'canceled'; country: string; total: number; }
 export interface DashboardStats { stockProducts: number; orders: number; deliveredOrders: number; customers: number; revenue: number; }
