@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ordersStatusData } from 'data/ordersStatusData';
+import { api, Order } from 'services/api';
 import { SelectChangeEvent } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
@@ -30,11 +30,12 @@ interface OrdersStatusTableProps {
 
 const OrdersStatusTable = ({ searchText }: OrdersStatusTableProps) => {
   const apiRef = useGridApiRef<GridApi>();
-  const [rows, setRows] = useState(ordersStatusData);
+  const [rows, setRows] = useState<Order[]>([]);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
   useEffect(() => {
     apiRef.current.setQuickFilterValues(searchText.split(/\b\W+\b/).filter((word) => word !== ''));
+    api.orders(searchText).then((result) => setRows(result.orders)).catch(() => undefined);
   }, [searchText]);
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
@@ -51,8 +52,8 @@ const OrdersStatusTable = ({ searchText }: OrdersStatusTableProps) => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
+  const handleDeleteClick = (id: GridRowId) => async () => {
+    try { await api.deleteOrder(Number(id)); setRows(rows.filter((row) => row.id !== id)); } catch { /* ignore */ }
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -67,8 +68,9 @@ const OrdersStatusTable = ({ searchText }: OrdersStatusTableProps) => {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    const updatedRow = { ...newRow, isNew: false } as Order;
+    await api.updateOrder(Number(newRow.id), { status: newRow.status, country: newRow.country, total: Number(newRow.total) });
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
@@ -99,9 +101,7 @@ const OrdersStatusTable = ({ searchText }: OrdersStatusTableProps) => {
           </Typography>
         </Stack>
       ),
-      valueGetter: (params: { name: string; email: string }) => {
-        return `${params.name} ${params.email}`;
-      },
+      valueGetter: (params: { row: Order }) => `${params.row.client.name} ${params.row.client.email}`,
       renderCell: (params) => {
         return (
           <Stack direction="column" alignSelf="center" justifyContent="center" sx={{ height: 1 }}>
