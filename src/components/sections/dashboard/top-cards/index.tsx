@@ -1,56 +1,25 @@
+import { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import TopCard from './TopCard';
-
-const cardsData = [
-  {
-    id: 1,
-    title: 'Save Products',
-    value: '50.8K',
-    rate: '28.4%',
-    isUp: true,
-    icon: 'carbon:favorite-filled',
-  },
-  {
-    id: 2,
-    title: 'Stock Products',
-    value: '23.6K',
-    rate: '12.6%',
-    isUp: false,
-    icon: 'solar:bag-bold',
-  },
-  {
-    id: 3,
-    title: 'Sale Products',
-    value: '756',
-    rate: '3.1%',
-    isUp: true,
-    icon: 'ph:bag-simple-fill',
-  },
-  {
-    id: 4,
-    title: 'Average Revenue',
-    value: '2.3K',
-    rate: '11.3%',
-    isUp: true,
-    icon: 'mingcute:currency-dollar-2-line',
-  },
-];
+import { api, DashboardStats } from 'services/api';
 
 const TopCards = () => {
+  const [stats, setStats] = useState<DashboardStats>({ stockProducts: 0, orders: 0, deliveredOrders: 0, customers: 0, revenue: 0 });
+
+  useEffect(() => {
+    api.summary().then((result) => setStats(result.stats)).catch(() => undefined);
+  }, []);
+
+  const cardsData = [
+    { id: 1, title: 'Stock Products', value: stats.stockProducts.toLocaleString(), rate: 'Live', isUp: true, icon: 'solar:bag-bold' },
+    { id: 2, title: 'Orders', value: stats.orders.toLocaleString(), rate: 'Live', isUp: true, icon: 'ph:bag-simple-fill' },
+    { id: 3, title: 'Customers', value: stats.customers.toLocaleString(), rate: 'Live', isUp: true, icon: 'carbon:favorite-filled' },
+    { id: 4, title: 'Revenue', value: `$${stats.revenue.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, rate: 'Live', isUp: true, icon: 'mingcute:currency-dollar-2-line' },
+  ];
+
   return (
     <Grid container spacing={{ xs: 2.5, sm: 3, lg: 3.75 }}>
-      {cardsData.map((item) => {
-        return (
-          <TopCard
-            key={item.id}
-            title={item.title}
-            value={item.value}
-            rate={item.rate}
-            isUp={item.isUp}
-            icon={item.icon}
-          />
-        );
-      })}
+      {cardsData.map((item) => <TopCard key={item.id} {...item} />)}
     </Grid>
   );
 };
