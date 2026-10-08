@@ -11,6 +11,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import IconifyIcon from 'components/base/IconifyIcon';
 import paths from 'routes/paths';
+import { api } from 'services/api';
 
 interface User {
   [key: string]: string;
@@ -102,7 +103,7 @@ const Login = () => {
             Forgot password?
           </Link>
         </Stack>
-        <Button type="submit" variant="contained" size="medium" fullWidth>
+        {error && <Typography color="error" variant="body2">{error}</Typography>}\n        <Button type="submit" variant="contained" size="medium" fullWidth>
           Submit
         </Button>
         <Typography
