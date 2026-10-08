@@ -1,47 +1,34 @@
+import { useEffect, useState } from 'react';
 import { fontFamily } from 'theme/typography';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import iPhone from 'assets/images/iPhone.png';
-import AWS8 from 'assets/images/AWS8.png';
 import Product from './Product';
-
-const productsData = [
-  {
-    id: 1,
-    name: 'iPhone 14 Pro Max',
-    imageUrl: iPhone,
-    inStock: 524,
-    price: '1,099.00',
-  },
-  {
-    id: 2,
-    name: 'Apple Watch S8',
-    imageUrl: AWS8,
-    inStock: 320,
-    price: '799.00',
-  },
-];
+import { api, Product as ProductModel } from 'services/api';
 
 const Products = () => {
+  const [products, setProducts] = useState<ProductModel[]>([]);
+
+  useEffect(() => {
+    api.products().then((result) => setProducts(result.products.slice(0, 4))).catch(() => undefined);
+  }, []);
+
   return (
     <Stack direction="column" gap={3.75} component={Paper} height={300}>
-      <Typography variant="h6" fontWeight={400} fontFamily={fontFamily.workSans}>
-        Products
-      </Typography>
-
+      <Typography variant="h6" fontWeight={400} fontFamily={fontFamily.workSans}>Products</Typography>
       <Stack justifyContent="space-between">
-        <Typography variant="caption" fontWeight={400}>
-          Products
-        </Typography>
-        <Typography variant="caption" fontWeight={400}>
-          Price
-        </Typography>
+        <Typography variant="caption" fontWeight={400}>Products</Typography>
+        <Typography variant="caption" fontWeight={400}>Price</Typography>
       </Stack>
-
-      {productsData.map((item) => {
-        return <Product key={item.id} data={item} />;
-      })}
+      {products.map((item) => (
+        <Product key={item.id} data={{
+          id: item.id,
+          name: item.name,
+          imageUrl: item.imageUrl ?? '',
+          inStock: item.inStock,
+          price: item.price.toFixed(2),
+        }} />
+      ))}
     </Stack>
   );
 };
